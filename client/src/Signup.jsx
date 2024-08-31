@@ -1,5 +1,7 @@
 import { useState } from "react";
+import { toast } from 'sonner'
 import { Link, useNavigate } from "react-router-dom";
+import OAuth from "./components/OAuth";
 
 
 export default function Signup() {
@@ -12,8 +14,36 @@ export default function Signup() {
         setFormData({...formData,[e.target.id]:e.target.value})
     }
 
-    const handleSubmit = (e) =>{
+    const handleSubmit =async (e) =>{
         e.preventDefault();
+
+        try {
+            setLoading(true);
+            const res = await fetch('/api/auth/signup', {
+                method: 'POST',
+                headers:{
+                    'Content-Type': 'application/json'
+                },
+                body:JSON.stringify(formData)
+            })
+            const data = await res.json();
+            setLoading(false);
+            console.log(data);
+            if (data.success === false) {
+                setError(true);
+                setLoading(false);
+                toast.error(data?.message);
+                return;
+              }
+            if(data.success){
+                navigate('/sign-in');
+            }
+            
+            setError(false)
+        } catch (error) {
+            setError(true);
+            setLoading(false);
+        }
     }
     
     
@@ -48,7 +78,7 @@ export default function Signup() {
         >
           {loading ? 'Loading...' : 'Sign Up'}
         </button>
-        {/* <OAuth /> */}
+        <OAuth />
       </form>
       <div className='flex gap-2 mt-5'>
         <p>Have an account?</p>
